@@ -402,6 +402,7 @@ const struct programmer_entry programmer_table[] = {
 	},
 #endif
 
+//PLACEHOLDER_NEWPROG_PROGRAMMER_ARRAY
 	{0}, /* This entry corresponds to PROGRAMMER_INVALID. */
 };
 

@@ -111,6 +111,7 @@ enum programmer {
 #if CONFIG_CH341A_SPI == 1
 	PROGRAMMER_CH341A_SPI,
 #endif
+//PLACEHOLDER_NEWPROG_PROGRAMMER_ENUM
 	PROGRAMMER_INVALID /* This must always be the last entry. */
 };
 
@@ -168,6 +169,7 @@ enum bitbang_spi_master_type {
 #if CONFIG_OGP_SPI == 1
 	BITBANG_SPI_MASTER_OGP,
 #endif
+//PLACEHOLDER_NEWPROG_PROGRAMMER_BITBANG_ENUM
 };
 
 struct bitbang_spi_master {
@@ -538,6 +540,8 @@ void ch341a_spi_delay(unsigned int usecs);
 extern const struct dev_entry devs_ch341a_spi[];
 #endif
 
+//PLACEHOLDER_NEWPROG_PUBLICFUNCTIONS
+
 /* flashrom.c */
 struct decode_sizes {
 	uint32_t parallel;
@@ -579,7 +583,7 @@ enum spi_controller {
 #if CONFIG_DEDIPROG == 1
 	SPI_CONTROLLER_DEDIPROG,
 #endif
-#if CONFIG_OGP_SPI == 1 || CONFIG_NICINTEL_SPI == 1 || CONFIG_RAYER_SPI == 1 || CONFIG_PONY_SPI == 1 || (CONFIG_INTERNAL == 1 && (defined(__i386__) || defined(__x86_64__)))
+#if CONFIG_OGP_SPI == 1 || CONFIG_NICINTEL_SPI == 1 || CONFIG_RAYER_SPI == 1 || CONFIG_PONY_SPI == 1 || (CONFIG_INTERNAL == 1 && (defined(__i386__) || defined(__x86_64__))) //PLACEHOLDER_NEWPROG_SELECT_SPI_BITBANG
 	SPI_CONTROLLER_BITBANG,
 #endif
 #if CONFIG_LINUX_SPI == 1
@@ -600,6 +604,7 @@ enum spi_controller {
 #if CONFIG_CH341A_SPI == 1
 	SPI_CONTROLLER_CH341A_SPI,
 #endif
+//PLACEHOLDER_NEWPROG_SPI_CONTROLLER_ENUM
 };
 
 #define MAX_DATA_UNSPECIFIED 0

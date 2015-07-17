@@ -632,6 +632,8 @@ CONFIG_IT8212 ?= yes
 # Winchiphead CH341A
 CONFIG_CH341A_SPI ?= yes
 
+#PLACEHOLDER_NEWPROG_DEFAULTCONFIG
+
 # Disable wiki printing by default. It is only useful if you have wiki access.
 CONFIG_PRINT_WIKI ?= no
 
@@ -695,7 +697,9 @@ else
 ifeq ($(CONFIG_OGP_SPI), yes)
 override CONFIG_BITBANG_SPI = yes
 else
+#PLACEHOLDER_NEWPROG_BITBANGSPICONFIG1
 CONFIG_BITBANG_SPI ?= no
+#PLACEHOLDER_NEWPROG_BITBANGSPICONFIG2
 endif
 endif
 endif
@@ -919,6 +923,8 @@ FEATURE_CFLAGS += -D'CONFIG_CH341A_SPI=1'
 PROGRAMMER_OBJS += ch341a_spi.o
 NEED_LIBUSB1 += CONFIG_CH341A_SPI
 endif
+
+#PLACEHOLDER_NEWPROG_COMPILERULE
 
 ifneq ($(NEED_SERIAL), )
 LIB_OBJS += serial.o

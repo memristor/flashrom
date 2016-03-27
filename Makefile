@@ -526,16 +526,14 @@ LIB_OBJS = layout.o flashrom.o udelay.o programmer.o helpers.o
 
 CLI_OBJS = cli_classic.o cli_output.o cli_common.o print.o
 
-# Set the flashrom version string from the highest revision number of the checked out flashrom files.
+# Set the flashrom version string from the repository metadata (cf. util/getrevision.sh).
 # Note to packagers: Any tree exported with "make export" or "make tarball"
-# will not require subversion. The downloadable snapshots are already exported.
-SVNVERSION := $(shell ./util/getrevision.sh -u 2>/dev/null )
+# will not require git. The downloadable snapshots are already exported.
+VERSION := $(shell ./util/getrevision.sh --revision 2>/dev/null)
+SCMDEF := -D'FLASHROM_VERSION="$(VERSION)"'
 
-RELEASE := 0.9.9
-VERSION := $(RELEASE)-$(SVNVERSION)
-RELEASENAME ?= $(VERSION)
-
-SVNDEF := -D'FLASHROM_VERSION="$(VERSION)"'
+# No spaces in release names unless set explicitly
+RELEASENAME ?= $(shell echo "$(VERSION)" | sed -e 's/ /_/')
 
 # Inform user if there is no meaningful version string. If there is version information from a VCS print
 # something anyway because $(info...) will print a line break in any case which would look suspicious.
@@ -1024,7 +1022,7 @@ libflashrom.a: $(LIBFLASHROM_OBJS)
 TAROPTIONS = $(shell LC_ALL=C tar --version|grep -q GNU && echo "--owner=root --group=root")
 
 %.o: %.c .features
-	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) $(FLASHROM_CFLAGS) $(FEATURE_CFLAGS) $(SVNDEF) -o $@ -c $<
+	$(CC) -MMD $(CFLAGS) $(CPPFLAGS) $(FLASHROM_CFLAGS) $(FEATURE_CFLAGS) $(SCMDEF) -o $@ -c $<
 
 # Make sure to add all names of generated binaries here.
 # This includes all frontends and libflashrom.
@@ -1347,9 +1345,10 @@ endif
 $(PROGRAM).8.html: $(PROGRAM).8
 	@groff -mandoc -Thtml $< >$@
 
+MAN_DATE := $(shell ./util/getrevision.sh -d $(PROGRAM).8.tmpl 2>/dev/null)
 $(PROGRAM).8: $(PROGRAM).8.tmpl
 	@# Add the man page change date and version to the man page
-	@sed -e 's#.TH FLASHROM 8 ".*".*#.TH FLASHROM 8 "$(shell ./util/getrevision.sh -d $(PROGRAM).8.tmpl 2>/dev/null)" "$(VERSION)"#' <$< >$@
+	@sed -e 's#.TH FLASHROM 8 .*#.TH FLASHROM 8 "$(MAN_DATE)" "$(VERSION)" "$(MAN_DATE)"#' <$< >$@
 
 install: $(PROGRAM)$(EXEC_SUFFIX) $(PROGRAM).8
 	mkdir -p $(DESTDIR)$(PREFIX)/sbin
@@ -1358,12 +1357,17 @@ install: $(PROGRAM)$(EXEC_SUFFIX) $(PROGRAM).8
 	$(INSTALL) -m 0644 $(PROGRAM).8 $(DESTDIR)$(MANDIR)/man8
 
 export: $(PROGRAM).8
-	@rm -rf $(EXPORTDIR)/flashrom-$(RELEASENAME)
-	@svn export -r BASE . $(EXPORTDIR)/flashrom-$(RELEASENAME)
-	@sed "s/^SVNVERSION.*/SVNVERSION := $(SVNVERSION)/" Makefile >$(EXPORTDIR)/flashrom-$(RELEASENAME)/Makefile
-	@cp $(PROGRAM).8 "$(EXPORTDIR)/flashrom-$(RELEASENAME)/$(PROGRAM).8"
-	@svn log >$(EXPORTDIR)/flashrom-$(RELEASENAME)/ChangeLog
-	@echo Exported $(EXPORTDIR)/flashrom-$(RELEASENAME)/
+	@rm -rf "$(EXPORTDIR)/flashrom-$(RELEASENAME)"
+	@mkdir -p "$(EXPORTDIR)/flashrom-$(RELEASENAME)"
+	@git archive HEAD | tar -x -C "$(EXPORTDIR)/flashrom-$(RELEASENAME)"
+	@sed	-e  's/^VERSION :=.*/VERSION := $(VERSION)/' \
+		-e 's/^MAN_DATE :=.*/MAN_DATE := $(MAN_DATE)/' \
+		-e 's#./util/getrevision.sh -c#false#' \
+		Makefile >"$(EXPORTDIR)/flashrom-$(RELEASENAME)/Makefile"
+	@for f in `git ls-tree -r -t --full-name --name-only HEAD` ; do \
+		touch -d `git log --pretty=format:%cI -1 HEAD -- "$$f"` "$(EXPORTDIR)/flashrom-$(RELEASENAME)/$$f"; \
+	done
+	@echo "Exported $(EXPORTDIR)/flashrom-$(RELEASENAME)/"
 
 tarball: export
 	@tar cjf $(EXPORTDIR)/flashrom-$(RELEASENAME).tar.bz2 -C $(EXPORTDIR)/ $(TAROPTIONS) flashrom-$(RELEASENAME)/

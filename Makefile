@@ -1015,7 +1015,7 @@ $(PROGRAM)$(EXEC_SUFFIX): $(OBJS)
 libflashrom.a: $(LIBFLASHROM_OBJS)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
-
+   
 # TAROPTIONS reduces information leakage from the packager's system.
 # If other tar programs support command line arguments for setting uid/gid of
 # stored files, they can be handled here as well.
@@ -1341,6 +1341,9 @@ endif
 		( echo "not found."; echo "UTSNAME := no" >> .features.tmp ) } 2>>$(BUILD_DETAILS_FILE) | tee -a $(BUILD_DETAILS_FILE)
 	@$(DIFF) -q .features.tmp .features >/dev/null 2>&1 && rm .features.tmp || mv .features.tmp .features
 	@rm -f .featuretest.c .featuretest$(EXEC_SUFFIX)
+
+
+$(shell ./util/git-hooks/install.sh) # Automatically install if need be
 
 $(PROGRAM).8.html: $(PROGRAM).8
 	@groff -mandoc -Thtml $< >$@
